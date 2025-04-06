@@ -21,11 +21,13 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import pl.eurokawa.security.SecurityService;
 import pl.eurokawa.services.BalanceBroadcaster;
 import pl.eurokawa.services.MoneyService;
 import pl.eurokawa.views.ludzie.UserView;
 import pl.eurokawa.views.wplaty.DepositAdderView;
 import pl.eurokawa.views.wplaty.DepositListView;
+import pl.eurokawa.views.zakupy.PurchaseConfirmation;
 import pl.eurokawa.views.zakupy.ShoppingHistoryView;
 import pl.eurokawa.views.zakupy.ShoppingView;
 
@@ -37,25 +39,26 @@ import java.util.TimerTask;
  */
 
 @Layout
-//@UIScope
 public class MainLayout extends AppLayout {
-    Logger log = LogManager.getLogger(MainLayout.class);
-    MoneyService moneyService;
-    NumberField balanceField;
+    private static final Logger log = LogManager.getLogger(MainLayout.class);
+    private MoneyService moneyService;
+    private NumberField balanceField;
+    private SecurityService securityService;
 
     private H1 viewTitle;
 
     @Autowired
-    public MainLayout(MoneyService moneyService) {
+    public MainLayout(MoneyService moneyService, SecurityService securityService) {
         this.moneyService = moneyService;
+        this.securityService = securityService;
         this.viewTitle = new H1();
 
-        init(moneyService);
+        init(moneyService,securityService);
     }
 
-    private void init(MoneyService moneyService) {
+    private void init(MoneyService moneyService,SecurityService securityService) {
         setPrimarySection(Section.DRAWER);
-        addDrawerContent(moneyService);
+        addDrawerContent(moneyService,securityService);
         addHeaderContent();
     }
 
@@ -70,7 +73,7 @@ public class MainLayout extends AppLayout {
         addToNavbar(true, toggle, viewTitle);
     }
 
-    private void addDrawerContent(MoneyService moneyService) {
+    private void addDrawerContent(MoneyService moneyService,SecurityService securityService) {
         UI ui = UI.getCurrent();
         if (ui != null) {
             BalanceBroadcaster.register(newBalance -> {
@@ -100,7 +103,7 @@ public class MainLayout extends AppLayout {
 
         BalanceBroadcaster.register(this::updateBalance);
 
-        Scroller scroller = new Scroller(createNavigation());
+        Scroller scroller = new Scroller(createNavigation(securityService));
 
         addToDrawer(balanceLabel, balanceField, header, scroller, createFooter());
     }
@@ -126,7 +129,7 @@ public class MainLayout extends AppLayout {
         }
     }
 
-    private SideNav createNavigation() {
+    private SideNav createNavigation(SecurityService securityService) {
         SideNav navigation = new SideNav();
 
         SideNavItem people = new SideNavItem("Ludzie", UserView.class, VaadinIcon.MALE.create());
@@ -136,6 +139,9 @@ public class MainLayout extends AppLayout {
 
         SideNavItem shopping = new SideNavItem("Zakupy", ShoppingView.class, VaadinIcon.CART.create());
         shopping.addItem(new SideNavItem("Historia zakupów", ShoppingHistoryView.class, VaadinIcon.LINES_LIST.create()));
+        if (securityService.hasRole("ADMIN")){
+            shopping.addItem(new SideNavItem("Zatwierdzanie zamówień", PurchaseConfirmation.class,VaadinIcon.CHECK_CIRCLE.create()));
+        }
 
         navigation.addItem(people, deposit, shopping);
 

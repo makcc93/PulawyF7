@@ -11,8 +11,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.sql.init.SqlDataSourceScriptDatabaseInitializer;
 import org.springframework.boot.autoconfigure.sql.init.SqlInitializationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import pl.eurokawa.data.UserRepository;
-import pl.eurokawa.services.AccessControl;
 
 /**
  * The entry point of the Spring Boot application.
@@ -24,8 +26,11 @@ import pl.eurokawa.services.AccessControl;
 @SpringBootApplication
 @Theme(value = "eurokawa", variant = Lumo.DARK)
 public class Application implements AppShellConfigurator {
-
+//koncze na tym ze wiele zrobilem :DDDD
+    //duzo dziala, czas na kolejne poprawki, wlacz strone i popatrz co mozna zrobic (na pewno usunac zatwoerdzanie zamowien)
+    //070425 00:15
     public static void main(String[] args) {
+        SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
         SpringApplication.run(Application.class, args);
     }
     @Bean
@@ -43,8 +48,4 @@ public class Application implements AppShellConfigurator {
         };
     }
 
-    @Bean
-    public AccessControl accessControl(AuthenticationContext authenticationContext) {
-        return new AccessControl(authenticationContext);
-    }
 }

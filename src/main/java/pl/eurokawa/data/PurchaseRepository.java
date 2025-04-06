@@ -10,4 +10,7 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer>, Jp
 
     @Query("SELECT p FROM Purchase p WHERE p.isConfirmed = true ORDER BY p.id DESC")
     List<Purchase> findConfirmedPurchasesHistory();
+
+    @Query("SELECT p FROM Purchase p JOIN p.user u WHERE p.isSaved = true AND p.isConfirmed = false ORDER BY p.id")
+    List<Purchase> findSavedNotConfirmedPurchases();
 }

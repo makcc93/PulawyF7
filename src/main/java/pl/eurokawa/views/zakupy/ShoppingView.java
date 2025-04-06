@@ -15,10 +15,17 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
+import com.vaadin.flow.spring.annotation.UIScope;
 import lombok.Data;
+import org.apache.catalina.security.SecurityUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.vaadin.lineawesome.LineAwesomeIconUrl;
 import pl.eurokawa.data.*;
 import  com.vaadin.flow.component.notification.Notification;
@@ -27,9 +34,8 @@ import pl.eurokawa.views.HomeView;
 
 import java.util.ArrayList;
 import java.util.List;
-
+@UIScope
 @Data
-@AnonymousAllowed
 @PageTitle("Zakupy")
 @Route("order")
 @Menu(order = 1, icon = LineAwesomeIconUrl.SHOPPING_CART_SOLID)
@@ -40,16 +46,15 @@ public class ShoppingView extends VerticalLayout {
     private UserService userService;
     private UserRepository userRepository;
     private MoneyService moneyService;
-    private AccessControl accessControl;
-    Logger logger = LogManager.getLogger(ShoppingView.class);
+
+    private static final Logger logger = LogManager.getLogger(ShoppingView.class);
 
     private Grid<Purchase> grid;
     private List<Purchase> purchases = new ArrayList<>();
     private ListDataProvider<Purchase> dataProvider;
 
     public ShoppingView(ProductService productService, PurchaseService purchaseService, UserService userService,
-                        PurchaseRepository purchaseRepository, UserRepository userRepository, MoneyService moneyService,
-                        AccessControl accessControl) {
+                        PurchaseRepository purchaseRepository, UserRepository userRepository, MoneyService moneyService) {
         this.productService = productService;
         this.purchaseService = purchaseService;
         this.purchaseRepository = purchaseRepository;
@@ -63,8 +68,6 @@ public class ShoppingView extends VerticalLayout {
         grid.setDataProvider(dataProvider);
         grid.setItems(dataProvider);
         grid.setAllRowsVisible(true);
-
-
 
         createProductColumn(grid);
         createQuantityColumn(grid);
@@ -197,7 +200,7 @@ public class ShoppingView extends VerticalLayout {
             save.addClickListener(event -> {
 
                 if (purchase.getProduct() != null && purchase.getPrice() != null && purchase.getPrice() != 0) {
-                    User user = userService.get(1).orElseThrow(); //first user, have to implements loginning
+                    User user = loggedUser(); //060425
 
                     purchaseService.addPurchase(user, purchase.getProduct().getId(), purchase.getPrice(), purchase.getQuantity());
 
@@ -276,7 +279,7 @@ public class ShoppingView extends VerticalLayout {
     }
 
     private void confirmPurchase(Grid<Purchase> grid){
-        User user = userRepository.findById(1).orElseThrow();//here should be logged user
+        User user = loggedUser();//here should be logged user
         boolean savedAnyPurchase = false;
         Double total = 0.00;
 
@@ -312,6 +315,14 @@ public class ShoppingView extends VerticalLayout {
     private void refreshGrid(Grid<Purchase> grid){
 
         grid.getDataProvider().refreshAll();
+    }
+
+    private User loggedUser(){
+        Authentication authentication = VaadinSession.getCurrent().getAttribute(Authentication.class);
+        String userEmail = authentication.getName();
+
+        return userService.getUserByEmail(userEmail)
+                .orElseThrow(() -> new UsernameNotFoundException("Nie rozpoznano zalogowanego użytkownika!"));
     }
 
 

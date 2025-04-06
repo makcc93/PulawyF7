@@ -1,14 +1,10 @@
 package pl.eurokawa.views.wplaty;
 
-import com.vaadin.copilot.javarewriter.LumoRewriterUtil;
-import com.vaadin.flow.component.Html;
-import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
-import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.grid.ColumnTextAlign;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -23,23 +19,27 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.lumo.LumoUtility;
+import com.vaadin.flow.spring.annotation.UIScope;
 import lombok.Data;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.vaadin.lineawesome.LineAwesomeIconUrl;
 import pl.eurokawa.data.*;
+import pl.eurokawa.security.SecurityService;
 import pl.eurokawa.services.*;
-import pl.eurokawa.views.ludzie.UserView;
+import com.vaadin.flow.component.textfield.TextArea;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@UIScope
 @Data
 @PageTitle("Wpłaty")
 @Route("deposit")
 @Menu(order = 2, icon = LineAwesomeIconUrl.DOLLAR_SIGN_SOLID)
 public class DepositAdderView extends VerticalLayout {
+    private SecurityService securityService;
     private ProductService productService;
     private PurchaseService purchaseService;
     private PurchaseRepository purchaseRepository;
@@ -50,32 +50,44 @@ public class DepositAdderView extends VerticalLayout {
     private Grid<Money> grid;
     private ListDataProvider<Money> dataProvider;
     private List<Money> transactions = new ArrayList<>();
-    private AccessControl accessControl;
-    Logger logger = LogManager.getLogger(DepositAdderView.class);
+    private static final Logger logger = LogManager.getLogger(DepositAdderView.class);
 
 
-    public DepositAdderView(ProductService productService, PurchaseRepository purchaseRepository, UserService userService, UserRepository userRepository, MoneyService moneyService, MoneyRepository moneyRepository, AccessControl accessControl) {
+    public DepositAdderView(SecurityService securityService, ProductService productService,
+                            PurchaseRepository purchaseRepository, UserService userService,
+                            UserRepository userRepository, MoneyService moneyService,
+                            MoneyRepository moneyRepository) {
+        this.securityService = securityService;
         this.productService = productService;
         this.purchaseRepository = purchaseRepository;
         this.userService = userService;
         this.userRepository = userRepository;
         this.moneyService = moneyService;
         this.moneyRepository = moneyRepository;
-        this.accessControl = accessControl;
-
         dataProvider = new ListDataProvider<>(transactions);
 
         grid = new Grid<> (Money.class,false);
         grid.setDataProvider(dataProvider);
         grid.setAllRowsVisible(true);
+        grid.setVisible(securityService.hasRole("ADMIN"));
+        
+        if (!securityService.hasRole("ADMIN")){
+
+            TextArea information = new TextArea();
+            information.setValue("Nie posiadasz dostępu do dodawania wpłat, aby zobaczyć ich historię przejdź do zakładki \"Historia wpłat\"");
+            information.setWidthFull();
+            information.setAutofocus(true);
+            information.setHeightFull();
+
+            add(information);
+        }
 
         createUserColumn(grid);
         createDepositColumn(grid);
         createActionsButtons(grid);
 
         addEmptyRow(grid);
-
-
+        
         add(grid);
     }
 
@@ -198,8 +210,8 @@ public class DepositAdderView extends VerticalLayout {
 
 
             HorizontalLayout layout = new HorizontalLayout();
-            layout.setAlignItems(FlexComponent.Alignment.CENTER);
-            layout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+            layout.setAlignItems(Alignment.CENTER);
+            layout.setJustifyContentMode(JustifyContentMode.CENTER);
             layout.add(status);
             add(layout);
     }

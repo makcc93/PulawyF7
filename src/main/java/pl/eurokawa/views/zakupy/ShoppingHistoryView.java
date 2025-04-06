@@ -3,37 +3,49 @@ package pl.eurokawa.views.zakupy;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.router.Menu;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.*;
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.spring.annotation.UIScope;
+import jakarta.annotation.security.RolesAllowed;
 import lombok.Data;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.security.core.Authentication;
 import org.vaadin.lineawesome.LineAwesomeIconUrl;
-import pl.eurokawa.data.Product;
 import pl.eurokawa.data.Purchase;
-import pl.eurokawa.services.AccessControl;
+import pl.eurokawa.security.SecurityService;
 import pl.eurokawa.services.PurchaseService;
-import pl.eurokawa.views.HomeView;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 
+@UIScope
 @Data
 @PageTitle("Historia zakupów")
 @Route("orderhistory")
 @Menu(order = 1.1, icon = LineAwesomeIconUrl.GRIP_LINES_SOLID)
-public class ShoppingHistoryView extends Div {
+public class ShoppingHistoryView extends Div implements BeforeEnterObserver {
     private PurchaseService purchaseService;
-    private AccessControl accessControl;
-    Logger logger = LogManager.getLogger(ShoppingHistoryView.class);
+    private SecurityService securityService;
+    private  static final Logger logger = LogManager.getLogger(ShoppingHistoryView.class);
 
-    public ShoppingHistoryView(PurchaseService purchaseService, AccessControl accessControl){
+    public ShoppingHistoryView(PurchaseService purchaseService, SecurityService securityService){
         this.purchaseService = purchaseService;
-        this.accessControl = accessControl;
+        this.securityService = securityService;
+
+        Authentication auth = VaadinSession.getCurrent().getAttribute(Authentication.class);
+            if (auth != null) {
+                logger.info("z VAADIN - User: " + auth.getName());
+                logger.info("z VAADIN - Roles: " + auth.getAuthorities());
+            }
+            else {
+                logger.info("             auth musi byc nullem :(");
+            }
+
 
         List<Purchase> purchases = purchaseService.getConfirmedPurchases();
 
@@ -68,5 +80,14 @@ public class ShoppingHistoryView extends Div {
         add(grid);
     }
 
+    @Override
+    public void beforeEnter(BeforeEnterEvent event){
+        if (!(securityService.hasRole("ADMIN") || securityService.hasRole("USER"))){
+            logger.warn("Użytkownik nie ma uprawnień do tej zakładki!");
+            Notification notification = Notification.show("Twoje uprawnienia nie pozwają korzystać z tej zakładki!", 3000, Notification.Position.BOTTOM_CENTER);
 
+            add(notification);
+            event.rerouteTo("home");
+        }
+    }
 }

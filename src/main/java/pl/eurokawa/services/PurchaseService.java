@@ -44,4 +44,9 @@ public class PurchaseService{
 
         return purchaseRepository.findConfirmedPurchasesHistory();
     }
+
+    public List<Purchase> getSavedNotConfirmedPurchases(){
+
+        return purchaseRepository.findSavedNotConfirmedPurchases();
+    }
 }

@@ -15,35 +15,30 @@ import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
-import com.vaadin.flow.data.converter.StringToIntegerConverter;
 import com.vaadin.flow.router.*;
+import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
 import org.vaadin.lineawesome.LineAwesomeIconUrl;
 import pl.eurokawa.data.MoneyRepository;
 import pl.eurokawa.data.User;
-import pl.eurokawa.services.AccessControl;
-import pl.eurokawa.services.SecurityUtils;
+import pl.eurokawa.security.SecurityService;
 import pl.eurokawa.services.UserService;
 import pl.eurokawa.views.MainLayout;
-
 import java.util.Optional;
 
+@UIScope
 @PageTitle("Ludzie")
 @Route(value = "users/:peopleID?/:action?(edit)", layout = MainLayout.class)
 @Menu(order = 0, icon = LineAwesomeIconUrl.ANKH_SOLID)
 public class UserView extends Div implements BeforeEnterObserver {
 
-    private AccessControl accessControl;
-    Logger logger = LogManager.getLogger(UserView.class);
+    private SecurityService securityService;
+    private static final Logger logger = LogManager.getLogger(UserView.class);
 
     private String PEOPLE_ID = "peopleID";
     private String PEOPLE_EDIT_ROUTE_TEMPLATE = "users/%s/edit";
@@ -64,11 +59,10 @@ public class UserView extends Div implements BeforeEnterObserver {
     private final UserService userService;
     private MoneyRepository moneyRepository;
 
-    public UserView(AccessControl accessControl, UserService userService, MoneyRepository moneyRepository) {
-        this.accessControl = accessControl;
+    public UserView(SecurityService securityService, UserService userService, MoneyRepository moneyRepository) {
+        this.securityService = securityService;
         this.userService = userService;
         this.moneyRepository = moneyRepository;
-        logger.info("Użytkownik zalogowany! SecurityUtils.isUserLoggedIn() = {}", SecurityUtils.isUserLoggedIn());
 
         addClassNames("ludzie-view");
         // Create UI
@@ -107,7 +101,7 @@ public class UserView extends Div implements BeforeEnterObserver {
             }
         });
 
-
+        logger.info("HasRole(ADMIN) = " +securityService.hasRole("ADMIN"));
 
         cancel.addClickListener(e -> {
             clearForm();
@@ -128,8 +122,7 @@ public class UserView extends Div implements BeforeEnterObserver {
                 Notification notification = Notification.show("Dane zaktualizowane pomyślnie");
                 notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                 notification.setPosition(Position.MIDDLE);
-                UI.getCurrent().navigate(UserView.class); //tak bylo a zmieniam na
-//                UI.getCurrent().getPage().reload();
+                UI.getCurrent().navigate(UserView.class);
             } catch (ObjectOptimisticLockingFailureException exception) {
                 Notification n = Notification.show(
                         "Błąd w aktualizacji danych. W miedzyczasie ktoś inny próbował aktualizować dane");
@@ -140,9 +133,8 @@ public class UserView extends Div implements BeforeEnterObserver {
                 n.setPosition(Position.MIDDLE);
                 n.addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
-
-
         });
+        save.setVisible(securityService.hasRole("ADMIN"));
 
         delete.addClickListener(e ->{
             try {
@@ -160,7 +152,7 @@ public class UserView extends Div implements BeforeEnterObserver {
                 throw new RuntimeException(ex);
             }
         });
-
+        delete.setVisible(securityService.hasRole("ADMIN"));
     }
 
     private void getSumOfUserDeposit(){
@@ -229,18 +221,6 @@ public class UserView extends Div implements BeforeEnterObserver {
 
         buttonLayout.add(save, cancel,delete);
         editorLayoutDiv.add(buttonLayout);
-
-        boolean isAdmin = accessControl.hasRole("ADMIN");
-        boolean isUser = accessControl.hasRole("USER");
-
-//        SecurityContextHolder.clearContext();
-
-        logger.info("isAdmin = {}", isAdmin);
-
-
-        save.setVisible(isAdmin);
-//        cancel.setVisible(isUser);
-//        delete.setVisible(isAdmin);
     }
 
     private void createGridLayout(SplitLayout splitLayout) {
@@ -260,7 +240,6 @@ public class UserView extends Div implements BeforeEnterObserver {
     }
 
     private void populateForm(User value) {
-//        logger.info("populateForm() called with user: {}", value);
         this.user = value;
 
         if (value != null){

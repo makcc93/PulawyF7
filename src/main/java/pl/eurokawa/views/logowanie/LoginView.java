@@ -18,6 +18,7 @@ import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -83,9 +84,9 @@ public class LoginView extends Div {
 
         Div formsContainer = new Div();
         formsContainer.getStyle()
-            .set("display", "flex")
-            .set("justify-content", "center")
-            .set("gap", "var(--lumo-space-xl)");
+                .set("display", "flex")
+                .set("justify-content", "center")
+                .set("gap", "var(--lumo-space-xl)");
 
         VerticalLayout loginPanel = createLoginView();
         Div divider = divider();
@@ -144,7 +145,7 @@ public class LoginView extends Div {
 
                 Notification.show("Rejestracja udana! Możesz się teraz zalogować",
                         3000, Notification.Position.MIDDLE);
-                
+
                 clearForm(firstNameField,lastNameField,emailField);
             }
         });
@@ -182,9 +183,9 @@ public class LoginView extends Div {
         }
 
         if(userService.getUserByEmail(email).isPresent()){
-        Notification.show("Użytkownik z podanym mailem już istnieje!",3000, Notification.Position.BOTTOM_CENTER);
+            Notification.show("Użytkownik z podanym mailem już istnieje!",3000, Notification.Position.BOTTOM_CENTER);
 
-        return false;
+            return false;
         }
 
         return true;
@@ -237,7 +238,7 @@ public class LoginView extends Div {
         loginForm.addLoginListener(event -> {
             try{
                 authenticate(event.getUsername(),event.getPassword());
-                UI.getCurrent().navigate("/home"); //bylo homeview.class
+                UI.getCurrent().navigate("/home");
             }
             catch(Exception e){
                 loginForm.setError(true);
@@ -251,6 +252,8 @@ public class LoginView extends Div {
 
         Authentication authenticated = authenticationManager.authenticate(authentication);
         SecurityContextHolder.getContext().setAuthentication(authenticated);
+
+        VaadinSession.getCurrent().setAttribute(Authentication.class,authenticated); //040425
     }
 
 }

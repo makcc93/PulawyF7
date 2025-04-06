@@ -1,0 +1,75 @@
+package pl.eurokawa.security;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.SecurityConfig;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+
+@EnableMethodSecurity(jsr250Enabled = true)
+@Configuration
+public class SecurityConfiguration {
+    private static final Logger log = LogManager.getLogger(SecurityConfiguration.class);
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception{
+        log.info("KONFIGURACJA SecurityFilterChain startuuuuuuje");
+
+        httpSecurity
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
+//                        .sessionFixation().migrateSession()) //neww
+
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/",
+                                "/login",
+                                "/login/**",
+                                "/register",
+                                "/error",
+                                "/webjars/**",
+                                "/static/**",
+                                "/VAADIN/**",
+                                "/frontend/**",
+                                "/webapp/**",
+                                "/sw.js",
+                                "/sw-runtime-resources-precache.js"
+                        ).permitAll()
+                        .anyRequest().authenticated()
+                )
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/home",true)
+                        .successHandler(((request, response, authentication) -> {
+                            log.info("Z a l o g o w a n o użytkownika: " + authentication.getName());
+                            log.info("R o l a: " + authentication.getAuthorities() );
+                            response.sendRedirect("/home");
+                        }))
+                        .permitAll()
+                )
+                .logout(logout -> logout.permitAll())
+                .csrf().disable(); //neww
+
+        return httpSecurity.build();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        AuthenticationManager manager = authenticationConfiguration.getAuthenticationManager();
+
+        return manager;
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();
+    }
+}
