@@ -4,6 +4,6 @@
 @import url('./views/checkout-form-view.css');
 
 .custom-header-style {
-    font-size: 20px; /* Rozmiar tekstu */
+    font-size: 40px; /* Rozmiar tekstu */
     font-weight: bold; /* Grubość tekstu */
 }

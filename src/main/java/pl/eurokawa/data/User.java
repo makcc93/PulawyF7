@@ -36,7 +36,7 @@ public class User extends AbstractEntity implements UserDetails {
         this.lastName = lastName;
         this.email = email;
         this.password = password;
-        this.role = "USER";
+        this.role = "NOTCONFIRMED";
     }
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,orphanRemoval = true)

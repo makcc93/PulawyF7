@@ -38,7 +38,7 @@ import pl.eurokawa.views.ludzie.UserView;
 public class LoginView extends Div {
     AuthenticationManager authenticationManager;
     UserService userService;
-    Logger logger = LogManager.getLogger(LoginView.class);
+    private static final Logger logger = LogManager.getLogger(LoginView.class);
 
     public LoginView(AuthenticationManager authenticationManager, UserService userService) {
         this.authenticationManager = authenticationManager;

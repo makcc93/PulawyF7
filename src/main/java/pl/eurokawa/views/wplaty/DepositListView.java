@@ -35,7 +35,7 @@ import java.util.Locale;
 public class DepositListView extends Div {
     MoneyRepository moneyRepository;
     MoneyService moneyService;
-    Logger logger = LogManager.getLogger(DepositListView.class);
+    private static final Logger logger = LogManager.getLogger(DepositListView.class);
 
 
 

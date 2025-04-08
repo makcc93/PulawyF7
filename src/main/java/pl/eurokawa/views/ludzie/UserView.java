@@ -59,6 +59,8 @@ public class UserView extends Div implements BeforeEnterObserver {
     private final UserService userService;
     private MoneyRepository moneyRepository;
 
+
+
     public UserView(SecurityService securityService, UserService userService, MoneyRepository moneyRepository) {
         this.securityService = securityService;
         this.userService = userService;
@@ -155,19 +157,12 @@ public class UserView extends Div implements BeforeEnterObserver {
         delete.setVisible(securityService.hasRole("ADMIN"));
     }
 
-    private void getSumOfUserDeposit(){
-        grid.addColumn("deposit").setAutoWidth(true).setHeader("SUMA WPŁAT");
-    }
-
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         Optional<Integer> peopleId = event.getRouteParameters().get(PEOPLE_ID).map(Integer::parseInt);
-//        logger.info("BeforeEnter triggered, peopleID = {}", peopleId.orElse(null));
-//        logger.info("Aktualny URL: {}", event.getLocation().getPath());
 
         if (peopleId.isPresent()) {
             Optional<User> peopleFromBackend = userService.get(peopleId.get());
-//            logger.info("User found in DB {}",peopleFromBackend.orElse(null));
 
             if (peopleFromBackend.isPresent()) {
                 grid.select(peopleFromBackend.get());
@@ -184,6 +179,12 @@ public class UserView extends Div implements BeforeEnterObserver {
             clearForm();
         }
     }
+
+    private void getSumOfUserDeposit(){
+        grid.addColumn("deposit").setAutoWidth(true).setHeader("SUMA WPŁAT");
+    }
+
+
 
 
     private void createEditorLayout(SplitLayout splitLayout) {

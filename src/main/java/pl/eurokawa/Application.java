@@ -26,9 +26,12 @@ import pl.eurokawa.data.UserRepository;
 @SpringBootApplication
 @Theme(value = "eurokawa", variant = Lumo.DARK)
 public class Application implements AppShellConfigurator {
-//koncze na tym ze wiele zrobilem :DDDD
-    //duzo dziala, czas na kolejne poprawki, wlacz strone i popatrz co mozna zrobic (na pewno usunac zatwoerdzanie zamowien)
-    //070425 00:15
+//do zrobienia, potwierdzenie zalozenia konta mailem
+    //dodanie przycisku wylogowania się
+    //dodanie przycisku informacji o koncie typu "Mateusz Kruk" w ktory sie klika i przechodzi do konta
+    //wysokosc depozytu do przerobienia na przycisk po kliknieciu ktorego przechodzi sie do historii wszystkich transakcji
+
+    //powodzenia! Jezus Panem!
     public static void main(String[] args) {
         SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
         SpringApplication.run(Application.class, args);

@@ -3,10 +3,12 @@ package pl.eurokawa.views;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Footer;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Header;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.sidenav.SideNav;
@@ -24,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import pl.eurokawa.security.SecurityService;
 import pl.eurokawa.services.BalanceBroadcaster;
 import pl.eurokawa.services.MoneyService;
+import pl.eurokawa.views.account.UserAccount;
 import pl.eurokawa.views.ludzie.UserView;
 import pl.eurokawa.views.wplaty.DepositAdderView;
 import pl.eurokawa.views.wplaty.DepositListView;
@@ -81,25 +84,42 @@ public class MainLayout extends AppLayout {
             });
         }
 
-        Span appName = new Span("Puławy F7");
+        Button appName = new Button("Puławy F7");
         appName.addClassNames(LumoUtility.FontWeight.SEMIBOLD, LumoUtility.FontSize.LARGE);
+        appName.setAutofocus(true);
+        appName.setIcon(new Icon(VaadinIcon.HOME));
+        appName.getStyle()
+                .set("font-size", "24px");
+        appName.addClickListener(event -> {
+            UI.getCurrent().navigate("/home");
+        });
+
         Header header = new Header(appName);
 
         TextField balanceLabel = new TextField();
         balanceLabel.setValue("DOSTĘPNE ŚRODKI");
         balanceLabel.addThemeVariants(TextFieldVariant.LUMO_ALIGN_CENTER);
         balanceLabel.setReadOnly(true);
-
+        balanceLabel.getStyle()
+                .set("color", "#05AX5C")
+                .set("font-size", "18px");
 
         balanceField = new NumberField();
+        balanceField.getStyle()
+                .set("font-size", "36px")
+                .set("margin-top", "auto")
+                .set("color", "#14AE5C");
         balanceField.addClassNames(
                 LumoUtility.FontSize.XLARGE, LumoUtility.FontWeight.EXTRABOLD,
-                LumoUtility.Background.SHADE, LumoUtility.Position.STATIC,
-                LumoUtility.Position.Bottom.XLARGE, LumoUtility.Border.BOTTOM, LumoUtility.TextAlignment.CENTER);
+                /*LumoUtility.Background.SHADE,*/ LumoUtility.Position.STATIC,
+                LumoUtility.Position.Bottom.XLARGE, /*LumoUtility.Border.BOTTOM,*/ LumoUtility.TextAlignment.CENTER);
         balanceField.addThemeVariants(TextFieldVariant.LUMO_ALIGN_CENTER);
         balanceField.setReadOnly(true);
         balanceField.getElement().getStyle().set("transition", "opacity 0.5s ease-in-out");
         balanceField.setValue(moneyService.getCurrentBalance());
+
+
+
 
         BalanceBroadcaster.register(this::updateBalance);
 
@@ -150,6 +170,14 @@ public class MainLayout extends AppLayout {
 
     private Footer createFooter() {
         Footer layout = new Footer();
+
+        Button button = new Button(securityService.getLoggedUserFirstAndLastName());
+        button.setIcon(new Icon(VaadinIcon.NURSE));
+        button.addClickListener(event -> {
+           UI.getCurrent().navigate(UserAccount.class);
+        });
+
+        layout.add(button);
 
         return layout;
     }

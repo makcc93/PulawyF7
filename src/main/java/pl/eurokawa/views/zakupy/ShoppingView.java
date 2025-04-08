@@ -86,7 +86,7 @@ public class ShoppingView extends VerticalLayout {
         purchaseConfirmation.addThemeVariants(ButtonVariant.LUMO_LARGE,ButtonVariant.LUMO_SUCCESS);
         purchaseConfirmation.addClickListener(event -> confirmPurchase(grid));
 
-        add(grid, plusButton,purchaseConfirmation);
+        add(grid, plusButton);
     }
     private void addEmptyRow() {
         Purchase purchase = new Purchase();

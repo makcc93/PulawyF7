@@ -78,6 +78,7 @@ public class DepositAdderView extends VerticalLayout {
             information.setWidthFull();
             information.setAutofocus(true);
             information.setHeightFull();
+            information.setReadOnly(true);
 
             add(information);
         }

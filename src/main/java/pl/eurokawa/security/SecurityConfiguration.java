@@ -21,12 +21,11 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception{
-        log.info("KONFIGURACJA SecurityFilterChain startuuuuuuje");
+        log.info("SecurityFilterChain starting properly");
 
         httpSecurity
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
-//                        .sessionFixation().migrateSession()) //neww
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
@@ -56,7 +55,7 @@ public class SecurityConfiguration {
                         .permitAll()
                 )
                 .logout(logout -> logout.permitAll())
-                .csrf().disable(); //neww
+                .csrf().disable();
 
         return httpSecurity.build();
     }

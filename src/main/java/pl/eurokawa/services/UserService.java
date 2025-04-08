@@ -2,9 +2,12 @@ package pl.eurokawa.services;
 
 import java.util.List;
 import java.util.Optional;
+
+import com.vaadin.flow.server.VaadinSession;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pl.eurokawa.data.User;
@@ -33,6 +36,12 @@ public class UserService {
         Optional<User> userByEmail = userRepository.findUserByEmail(email);
 
         return userByEmail;
+    }
+
+    public Optional<User> getUserById(Integer id){
+        Optional<User> userById = userRepository.findUserById(id);
+
+        return userById;
     }
 
     public Optional<User> get(Integer id) {
