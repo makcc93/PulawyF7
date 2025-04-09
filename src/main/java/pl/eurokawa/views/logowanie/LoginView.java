@@ -35,6 +35,7 @@ import pl.eurokawa.views.ludzie.UserView;
 @AnonymousAllowed
 @Route(value = "login", layout = EmptyLayout.class)
 @RouteAlias(value = "", layout = EmptyLayout.class)
+@RouteAlias(value = "register",layout = EmptyLayout.class)
 public class LoginView extends Div {
     AuthenticationManager authenticationManager;
     UserService userService;

@@ -3,6 +3,7 @@ package pl.eurokawa.views.ludzie;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -48,18 +49,15 @@ public class UserView extends Div implements BeforeEnterObserver {
     private TextField firstName;
     private TextField lastName;
     private TextField email;
+    private ComboBox<String> role;
     private final Button cancel = new Button("Anuluj");
     private final Button save = new Button("Zapisz");
     private final Button delete = new Button("Usuń");
 
     private final BeanValidationBinder<User> binder;
-
     private User user;
-
     private final UserService userService;
     private MoneyRepository moneyRepository;
-
-
 
     public UserView(SecurityService securityService, UserService userService, MoneyRepository moneyRepository) {
         this.securityService = securityService;
@@ -112,19 +110,25 @@ public class UserView extends Div implements BeforeEnterObserver {
 
         save.addClickListener(e -> {
             try {
-                if (this.user == null) {
-                    this.user = new User();
+                if (this.user != null) {
+                    binder.writeBean(this.user);
+                    userService.save(this.user);
+
+                    refreshGrid();
+                    clearForm();
+
+                    Notification notification = Notification.show("Dane zaktualizowane pomyślnie");
+                    notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                    notification.setPosition(Position.MIDDLE);
+                    UI.getCurrent().navigate(UserView.class);
                 }
-                binder.writeBean(this.user);
-                userService.save(this.user);
+                else {
+                    Notification notification = Notification.show("Błędne dane!",3000,Position.BOTTOM_CENTER);
+                    notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
 
-                refreshGrid();
-                clearForm();
-
-                Notification notification = Notification.show("Dane zaktualizowane pomyślnie");
-                notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                notification.setPosition(Position.MIDDLE);
-                UI.getCurrent().navigate(UserView.class);
+                    refreshGrid();
+                    clearForm();
+                }
             } catch (ObjectOptimisticLockingFailureException exception) {
                 Notification n = Notification.show(
                         "Błąd w aktualizacji danych. W miedzyczasie ktoś inny próbował aktualizować dane");
@@ -157,30 +161,10 @@ public class UserView extends Div implements BeforeEnterObserver {
         delete.setVisible(securityService.hasRole("ADMIN"));
     }
 
-    @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        Optional<Integer> peopleId = event.getRouteParameters().get(PEOPLE_ID).map(Integer::parseInt);
 
-        if (peopleId.isPresent()) {
-            Optional<User> peopleFromBackend = userService.get(peopleId.get());
-
-            if (peopleFromBackend.isPresent()) {
-                grid.select(peopleFromBackend.get());
-                populateForm(peopleFromBackend.get());
-            } else {
-                Notification.show(String.format("The requested user was not found, ID = %s", peopleId.get()), 3000,
-                        Notification.Position.BOTTOM_START);
-
-                refreshGrid();
-                event.forwardTo(UserView.class);
-            }
-        }
-        else {
-            clearForm();
-        }
-    }
 
     private void getSumOfUserDeposit(){
+
         grid.addColumn("deposit").setAutoWidth(true).setHeader("SUMA WPŁAT");
     }
 
@@ -198,14 +182,25 @@ public class UserView extends Div implements BeforeEnterObserver {
         FormLayout formLayout = new FormLayout();
         firstName = new TextField("Imię");
         firstName.setPlaceholder("Wprowadź imię..");
+        firstName.setReadOnly(!securityService.hasRole("ADMIN"));
 
         lastName = new TextField("Nazwisko");
         lastName.setPlaceholder("Wprowadź nazwisko..");
+        lastName.setReadOnly(!securityService.hasRole("ADMIN"));
 
         email = new TextField("Email");
         email.setPlaceholder("Wprowadź maila..");
+        email.setReadOnly(!securityService.hasRole("ADMIN"));
 
-        formLayout.add(firstName, lastName, email);
+        role = new ComboBox<>("Rodzaj użytkownika");
+        role.setVisible(securityService.hasRole("ADMIN"));
+        role.setAllowCustomValue(true);
+        role.setItems("NOTCONFIRMED","USER","ADMIN");
+        role.setHelperText("Rozwiń listę, aby nadać uprawnienia");
+
+
+
+        formLayout.add(firstName, lastName, email,role);
 
         editorDiv.add(formLayout);
         createButtonLayout(editorLayoutDiv);
@@ -251,6 +246,29 @@ public class UserView extends Div implements BeforeEnterObserver {
             firstName.clear();
             lastName.clear();
             email.clear();
+        }
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        Optional<Integer> peopleId = event.getRouteParameters().get(PEOPLE_ID).map(Integer::parseInt);
+
+        if (peopleId.isPresent()) {
+            Optional<User> peopleFromBackend = userService.get(peopleId.get());
+
+            if (peopleFromBackend.isPresent()) {
+                grid.select(peopleFromBackend.get());
+                populateForm(peopleFromBackend.get());
+            } else {
+                Notification.show(String.format("The requested user was not found, ID = %s", peopleId.get()), 3000,
+                        Notification.Position.BOTTOM_START);
+
+                refreshGrid();
+                event.forwardTo(UserView.class);
+            }
+        }
+        else {
+            clearForm();
         }
     }
 }

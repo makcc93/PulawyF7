@@ -1,5 +1,6 @@
 package pl.eurokawa.views;
 
+import ch.qos.logback.core.subst.NodeToStringTransformer;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
@@ -10,6 +11,8 @@ import com.vaadin.flow.component.html.Header;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
@@ -47,6 +50,7 @@ public class MainLayout extends AppLayout {
     private MoneyService moneyService;
     private NumberField balanceField;
     private SecurityService securityService;
+    private Button loggedUserButton;
 
     private H1 viewTitle;
 
@@ -118,9 +122,6 @@ public class MainLayout extends AppLayout {
         balanceField.getElement().getStyle().set("transition", "opacity 0.5s ease-in-out");
         balanceField.setValue(moneyService.getCurrentBalance());
 
-
-
-
         BalanceBroadcaster.register(this::updateBalance);
 
         Scroller scroller = new Scroller(createNavigation(securityService));
@@ -171,16 +172,28 @@ public class MainLayout extends AppLayout {
     private Footer createFooter() {
         Footer layout = new Footer();
 
-        Button button = new Button(securityService.getLoggedUserFirstAndLastName());
-        button.setIcon(new Icon(VaadinIcon.NURSE));
-        button.addClickListener(event -> {
+        loggedUserButton = new Button(securityService.getLoggedUserFirstAndLastName());
+        loggedUserButton.setIcon(new Icon(VaadinIcon.NURSE));
+        loggedUserButton.addClickListener(event -> {
            UI.getCurrent().navigate(UserAccount.class);
         });
 
-        layout.add(button);
+
+
+        Button logoutButton = new Button(new Icon(VaadinIcon.POWER_OFF));
+        logoutButton.addClickListener(event -> {
+
+            Notification notification = Notification.show("Do zobaczenia następnym razem!",2000, Notification.Position.BOTTOM_CENTER);
+            notification.addThemeVariants(NotificationVariant.LUMO_PRIMARY);
+
+            UI.getCurrent().getPage().setLocation("/logout");
+        });
+
+        layout.add(loggedUserButton,logoutButton);
 
         return layout;
     }
+
 
     private String getCurrentPageTitle() {
         return MenuConfiguration.getPageHeader(getContent()).orElse("");
@@ -190,5 +203,9 @@ public class MainLayout extends AppLayout {
     protected void afterNavigation() {
         super.afterNavigation();
         setContent(getContent());
+
+        if (loggedUserButton != null){
+            loggedUserButton.setText(securityService.getLoggedUserFirstAndLastName());
+        }
     }
 }

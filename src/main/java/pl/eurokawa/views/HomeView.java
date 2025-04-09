@@ -44,19 +44,22 @@ public class HomeView extends VerticalLayout implements BeforeEnterObserver {
                 .set("margin-top", "auto");
         welcome.setValue("""
                 Witaj na stronie!
+                Miło Cię widzieć.
                 
                 W lewym górnym rogu strony widoczne są obecne zgromadzone środki, którymi możemy wspólnie dysponować
                 
                 Zakładki:
                 
-                W zakładce \"Ludzie\"  możesz sprawdzić wszystkie osoby oraz łączną sumę ich wpłat
+                W zakładce \"Ludzie\"  możesz sprawdzić wszystkie osoby oraz łączną sumę ich wpłat.
                 
-                Do zakładki \"Wpłaty\" ma dostęp obecny skarbnik, to on rejestruje Twoje wpłaty
+                Do zakładki \"Wpłaty\" ma dostęp obecny skarbnik, to on rejestruje Twoje wpłaty.
                 W zakładce \"Historia wpłat\" możesz zobaczyć wpłaty wszystkich osób,
-                jeśli dokonałeś wpłaty, a jej nie widzisz powiadom skarbnika o tym fakcie
+                jeśli dokonałeś wpłaty, a jej nie widzisz przed dłuższy czas to powiadom o tym skarbnika.
                 
                 W zakładce \"Zakupy\" możesz zarejestrować dokonany przez Ciebie zakup,
-                wszystkie potwierdzone przez skarbnika zakupy są widoczne w zakładce \"Historia zakupów\"
+                wszystkie potwierdzone przez skarbnika zakupy są widoczne w zakładce \"Historia zakupów\".
+                
+                W lewym dolnym rogu jest zakładka Twojego konta oraz przycisk wylogowania.
                 
                 """);
         welcome.setHeightFull();
