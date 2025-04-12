@@ -1,4 +1,4 @@
-package pl.eurokawa.views.ludzie;
+package pl.eurokawa.views.people;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -23,7 +23,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.vaadin.lineawesome.LineAwesomeIconUrl;
 import pl.eurokawa.data.MoneyRepository;
 import pl.eurokawa.data.User;

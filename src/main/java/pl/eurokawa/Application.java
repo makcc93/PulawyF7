@@ -26,10 +26,9 @@ import pl.eurokawa.data.UserRepository;
 @SpringBootApplication
 @Theme(value = "eurokawa", variant = Lumo.DARK)
 public class Application implements AppShellConfigurator {
-
-    //dobra robota!!!!
-    //teraz trzeba dodac autoryzacje przez maila, potwierdzenie waznosci konta
-    //powodzenia!!!!!
+//koncze na tym ze mozna dodawac foto ale nie wyswietla sie miniaturka w historii zakupow, trzeba poprawic
+    //potem chyba czas rozszerzyc account view o avatar lub cos innego
+    //powodzenia!
     
     public static void main(String[] args) {
         SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);

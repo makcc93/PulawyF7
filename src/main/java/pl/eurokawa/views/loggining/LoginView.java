@@ -1,4 +1,4 @@
-package pl.eurokawa.views.logowanie;
+package pl.eurokawa.views.loggining;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -29,7 +29,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import pl.eurokawa.EmptyLayout;
 import pl.eurokawa.services.UserService;
-import pl.eurokawa.views.ludzie.UserView;
 
 
 @AnonymousAllowed

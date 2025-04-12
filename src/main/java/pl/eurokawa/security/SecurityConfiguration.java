@@ -40,7 +40,8 @@ public class SecurityConfiguration {
                                 "/frontend/**",
                                 "/webapp/**",
                                 "/sw.js",
-                                "/sw-runtime-resources-precache.js"
+                                "/sw-runtime-resources-precache.js",
+                                "/receipts/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

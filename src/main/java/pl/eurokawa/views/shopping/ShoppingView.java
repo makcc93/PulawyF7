@@ -1,4 +1,4 @@
-package pl.eurokawa.views.zakupy;
+package pl.eurokawa.views.shopping;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
@@ -10,30 +10,35 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.upload.Upload;
+import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
-import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.spring.annotation.UIScope;
 import lombok.Data;
-import org.apache.catalina.security.SecurityUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.vaadin.lineawesome.LineAwesomeIconUrl;
 import pl.eurokawa.data.*;
 import  com.vaadin.flow.component.notification.Notification;
 import pl.eurokawa.services.*;
-import pl.eurokawa.views.HomeView;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+
 @UIScope
 @Data
 @PageTitle("Zakupy")
@@ -49,6 +54,8 @@ public class ShoppingView extends VerticalLayout {
 
     private static final Logger logger = LogManager.getLogger(ShoppingView.class);
 
+    private static final String UPLOAD_PATH = "C:\\Users\\Gosia\\Desktop\\upload\\receipts\\";
+
     private Grid<Purchase> grid;
     private List<Purchase> purchases = new ArrayList<>();
     private ListDataProvider<Purchase> dataProvider;
@@ -62,6 +69,8 @@ public class ShoppingView extends VerticalLayout {
         this.userRepository = userRepository;
         this.moneyService = moneyService;
 
+
+
         dataProvider = new ListDataProvider<>(purchases);
 
         grid = new Grid<>(Purchase.class,false);
@@ -73,6 +82,7 @@ public class ShoppingView extends VerticalLayout {
         createQuantityColumn(grid);
         createPriceColumn(grid);
         createSumColumn(grid);
+        createImageAdderColumn(grid);
         createActionsButtons(grid);
         addEmptyRow();
 
@@ -88,6 +98,39 @@ public class ShoppingView extends VerticalLayout {
 
         add(grid, plusButton);
     }
+
+    private void createImageAdderColumn(Grid<Purchase> grid) {
+        grid.addColumn(new ComponentRenderer<>(purchase ->{
+        Upload upload = new Upload();
+        upload.setAcceptedFileTypes("image/jpeg", "image/jpg", "image/png");
+
+        MemoryBuffer buffer = new MemoryBuffer();
+        upload.setReceiver(buffer);
+
+        upload.addSucceededListener(event -> {
+            String fileName = UUID.randomUUID() + "_" + event.getFileName();
+            Path path = Paths.get(UPLOAD_PATH + fileName);
+
+            try (InputStream inputStream = buffer.getInputStream()) {
+                Files.copy(inputStream, path, StandardCopyOption.REPLACE_EXISTING);
+
+                purchase.setReceiptImagePath("/receipts/" + fileName);
+                logger.info("Poprawnie dodano zdjęcie");
+                Notification n = Notification.show("Zdjęcie dodane prawidłowo!");
+
+            } catch (IOException e) {
+                logger.info("Nie udało się dodać zdjęcia");
+                Notification n = Notification.show("Zdjęcie nie dodane prawidłowo!");
+                n.addThemeVariants(NotificationVariant.LUMO_ERROR);
+                throw new RuntimeException(e);
+
+            }
+
+        });
+
+        return upload;
+        }));};
+
     private void addEmptyRow() {
         Purchase purchase = new Purchase();
         purchase.setQuantity(1);
@@ -200,10 +243,14 @@ public class ShoppingView extends VerticalLayout {
             save.addClickListener(event -> {
 
                 if (purchase.getProduct() != null && purchase.getPrice() != null && purchase.getPrice() != 0) {
-                    User user = loggedUser(); //060425
+                    User user = loggedUser();
 
-                    purchaseService.addPurchase(user, purchase.getProduct().getId(), purchase.getPrice(), purchase.getQuantity());
+                    if (purchase.getReceiptImagePath() != null){
+                        purchaseService.addPurchase(user, purchase.getProduct().getId(), purchase.getPrice(), purchase.getQuantity(),purchase.getReceiptImagePath());
 
+                    } else {
+                        purchaseService.addPurchase(user, purchase.getProduct().getId(), purchase.getPrice(), purchase.getQuantity());
+                    }
                     purchase.setSaved(true);
                     dataProvider.refreshAll();
 

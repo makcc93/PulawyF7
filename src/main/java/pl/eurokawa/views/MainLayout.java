@@ -1,6 +1,5 @@
 package pl.eurokawa.views;
 
-import ch.qos.logback.core.subst.NodeToStringTransformer;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
@@ -8,7 +7,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Footer;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Header;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -21,7 +19,6 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.router.Layout;
 import com.vaadin.flow.server.menu.MenuConfiguration;
-import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,12 +27,12 @@ import pl.eurokawa.security.SecurityService;
 import pl.eurokawa.services.BalanceBroadcaster;
 import pl.eurokawa.services.MoneyService;
 import pl.eurokawa.views.account.UserAccount;
-import pl.eurokawa.views.ludzie.UserView;
-import pl.eurokawa.views.wplaty.DepositAdderView;
-import pl.eurokawa.views.wplaty.DepositListView;
-import pl.eurokawa.views.zakupy.PurchaseConfirmation;
-import pl.eurokawa.views.zakupy.ShoppingHistoryView;
-import pl.eurokawa.views.zakupy.ShoppingView;
+import pl.eurokawa.views.people.UserView;
+import pl.eurokawa.views.deposits.DepositAdderView;
+import pl.eurokawa.views.deposits.DepositListView;
+import pl.eurokawa.views.shopping.PurchaseConfirmation;
+import pl.eurokawa.views.shopping.ShoppingHistoryView;
+import pl.eurokawa.views.shopping.ShoppingView;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -181,6 +178,7 @@ public class MainLayout extends AppLayout {
 
 
         Button logoutButton = new Button(new Icon(VaadinIcon.POWER_OFF));
+        logoutButton.setTooltipText("Wyloguj się");
         logoutButton.addClickListener(event -> {
 
             Notification notification = Notification.show("Do zobaczenia następnym razem!",2000, Notification.Position.BOTTOM_CENTER);
@@ -188,6 +186,7 @@ public class MainLayout extends AppLayout {
 
             UI.getCurrent().getPage().setLocation("/logout");
         });
+
 
         layout.add(loggedUserButton,logoutButton);
 

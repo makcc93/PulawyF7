@@ -2,12 +2,9 @@ package pl.eurokawa.data;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import pl.eurokawa.views.ludzie.UserView;
 
 import java.util.Collection;
 import java.util.List;

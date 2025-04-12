@@ -1,4 +1,4 @@
-package pl.eurokawa.views.wplaty;
+package pl.eurokawa.views.deposits;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -10,7 +10,6 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -29,7 +28,6 @@ import pl.eurokawa.security.SecurityService;
 import pl.eurokawa.services.*;
 import com.vaadin.flow.component.textfield.TextArea;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 

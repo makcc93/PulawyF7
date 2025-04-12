@@ -1,13 +1,8 @@
-package pl.eurokawa.views.wplaty;
+package pl.eurokawa.views.deposits;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.treegrid.TreeGrid;
-import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
@@ -20,9 +15,7 @@ import org.vaadin.lineawesome.LineAwesomeIconUrl;
 import pl.eurokawa.data.Money;
 import pl.eurokawa.data.MoneyRepository;
 import pl.eurokawa.services.MoneyService;
-import pl.eurokawa.views.ludzie.UserView;
 
-import java.awt.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;

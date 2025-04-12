@@ -1,4 +1,4 @@
-package pl.eurokawa.views.zakupy;
+package pl.eurokawa.views.shopping;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -8,7 +8,6 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Menu;
@@ -76,6 +75,8 @@ public class PurchaseConfirmation extends Div {
         })).setHeader("DATA").setAutoWidth(true);
 
         grid.addColumn(Purchase::getTotal).setHeader("WARTOŚĆ CAŁOŚCIOWA").setAutoWidth(true);
+
+        grid.addColumn(new ComponentRenderer<>(PurchaseService::getPurchasePhoto)).setHeader("DOWÓD ZAKUPU").setAutoWidth(true);
 
         createActionButtons(grid);
 

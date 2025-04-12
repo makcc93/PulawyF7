@@ -1,14 +1,16 @@
-package pl.eurokawa.views.zakupy;
+package pl.eurokawa.views.shopping;
 
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.UIScope;
-import jakarta.annotation.security.RolesAllowed;
 import lombok.Data;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -67,7 +69,7 @@ public class ShoppingHistoryView extends Div implements BeforeEnterObserver {
             String createdAt = String.valueOf(purchase.getCreatedAt());
             LocalDateTime date = LocalDateTime.parse(createdAt);
 
-            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MM yyyy, HH:mm:ss", Locale.of("pl", "PL"));
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy, HH:mm:ss", Locale.of("pl", "PL"));
 
             String finalDate = date.format(dateTimeFormatter);
 
@@ -77,6 +79,7 @@ public class ShoppingHistoryView extends Div implements BeforeEnterObserver {
 
         grid.addColumn(Purchase::getTotal).setHeader("WARTOŚĆ CAŁOŚCIOWA").setAutoWidth(true);
 
+        grid.addColumn(new ComponentRenderer<>(PurchaseService::getPurchasePhoto)).setHeader("DOWOD ZAKUPU").setAutoWidth(true);
         add(grid);
     }
 

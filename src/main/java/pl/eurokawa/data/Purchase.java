@@ -38,6 +38,9 @@ public class Purchase extends AbstractEntity{
 
     private LocalDateTime createdAt;
 
+    @Column(name = "receipt_image_path")
+    private String receiptImagePath;
+
     @PrePersist
 protected void onCreate(){
         createdAt = LocalDateTime.now();
@@ -54,6 +57,18 @@ protected void onCreate(){
         this.isSaved = false;
         this.date = LocalDateTime.now();
         this.total = price * quantity;
+    }
+
+    public Purchase(User user, Product product, double price, int quantity,String receiptImagePath){
+        this.user = user;
+        this.product = product;
+        this.price = price;
+        this.quantity = quantity;
+        this.isConfirmed = false;
+        this.isSaved = false;
+        this.date = LocalDateTime.now();
+        this.total = price * quantity;
+        this.receiptImagePath = receiptImagePath;
     }
 
     public void updateTotal(){
@@ -139,5 +154,13 @@ protected void onCreate(){
 
     public void setSaved(boolean saved) {
         isSaved = saved;
+    }
+
+    public String getReceiptImagePath() {
+        return receiptImagePath;
+    }
+
+    public void setReceiptImagePath(String receiptImagePath) {
+        this.receiptImagePath = receiptImagePath;
     }
 }
