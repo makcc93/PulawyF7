@@ -1,8 +1,11 @@
 package pl.eurokawa.views.loggining;
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
@@ -11,6 +14,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.login.LoginForm;
 import com.vaadin.flow.component.login.LoginI18n;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -22,6 +26,7 @@ import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.aspectj.weaver.tools.cache.CachedClassEntry;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -29,6 +34,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import pl.eurokawa.EmptyLayout;
 import pl.eurokawa.services.UserService;
+
+import java.util.Collection;
 
 
 @AnonymousAllowed
@@ -112,7 +119,6 @@ public class LoginView extends Div {
 
     private VerticalLayout createRegisterView() {
         VerticalLayout registerPanel = new VerticalLayout();
-
         registerPanel.setPadding(true);
         registerPanel.setWidth("450px");
         registerPanel.setHeight("100%");
@@ -150,8 +156,6 @@ public class LoginView extends Div {
             }
         });
         registerButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
-
-
 
         FormLayout registerForm = new FormLayout();
         registerForm.add(firstNameField,lastNameField,emailField,passwordField,confirmPasswordField,registerButton);
@@ -244,6 +248,42 @@ public class LoginView extends Div {
                 loginForm.setError(true);
             }
         });
+
+        loginForm.addForgotPasswordListener(event -> {
+            setNewPassword();
+        });
+    }
+
+    private void setNewPassword(){
+        VerticalLayout verticalLayout = new VerticalLayout();
+        Dialog dialog = new Dialog();
+
+        TextField emailField = new TextField("Email");
+        PasswordField newPasswordField = new PasswordField("Nowe hasło");
+
+        FormLayout layout = new FormLayout();
+        layout.add(emailField,newPasswordField);
+
+        Button confirmButton = new Button("Zapisz nowe hasło", event ->{
+            String email = emailField.getValue();
+            String password = newPasswordField.getValue();
+
+            userService.setUserNewPassword(email,password);
+
+            dialog.close();
+        });
+        confirmButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+
+        Button cancelResetButton = new Button("Anuluj",event ->{
+            dialog.close();
+        });
+        cancelResetButton.addThemeVariants(ButtonVariant.LUMO_WARNING);
+
+        verticalLayout.add(layout,confirmButton,cancelResetButton);
+
+        dialog.add(verticalLayout);
+        dialog.setHeaderTitle("Ustalenie nowego hasła");
+        dialog.open();
     }
 
 
@@ -253,7 +293,7 @@ public class LoginView extends Div {
         Authentication authenticated = authenticationManager.authenticate(authentication);
         SecurityContextHolder.getContext().setAuthentication(authenticated);
 
-        VaadinSession.getCurrent().setAttribute(Authentication.class,authenticated); //040425
+        VaadinSession.getCurrent().setAttribute(Authentication.class,authenticated);
     }
 
 }

@@ -72,11 +72,15 @@ public class DepositAdderView extends VerticalLayout {
         if (!securityService.hasRole("ADMIN")){
 
             TextArea information = new TextArea();
-            information.setValue("Nie posiadasz dostępu do dodawania wpłat, aby zobaczyć ich historię przejdź do zakładki \"Historia wpłat\"");
+            information.setValue("""
+            Nie posiadasz dostępu do dodawania wpłat, aby zobaczyć ich historię przejdź do zakładki niżej \"Historia wpłat\".
+            Jeśli dokonałeś wpłaty, ale jej nie widzisz zgłoś ten fakt skarbnikowi.
+            """);
             information.setWidthFull();
             information.setAutofocus(true);
             information.setHeightFull();
             information.setReadOnly(true);
+            information.getStyle().set("font-size","48px");
 
             add(information);
         }

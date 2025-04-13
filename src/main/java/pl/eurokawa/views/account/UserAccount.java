@@ -3,11 +3,14 @@ package pl.eurokawa.views.account;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
@@ -17,6 +20,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.UIScope;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.atmosphere.interceptor.AtmosphereResourceStateRecovery;
 import org.springframework.dao.DataIntegrityViolationException;
 import pl.eurokawa.data.User;
 import pl.eurokawa.security.SecurityService;
@@ -43,8 +47,10 @@ public class UserAccount extends Div implements BeforeEnterObserver {
 
         binder = new BeanValidationBinder<>(User.class);
 
-        VerticalLayout layout = new VerticalLayout();
+        HorizontalLayout horizontalLayout = new HorizontalLayout();
+
         VerticalLayout userContent = createUserInformations(loggedUser);
+        VerticalLayout changePassword = changeUserPassword(loggedUser);
 
 
 
@@ -54,17 +60,13 @@ public class UserAccount extends Div implements BeforeEnterObserver {
         h1.getStyle()
                 .set("text-align", "center")
                 .set("margin-bottom", "var(--lumo-space-l)");
-        H1 h2 = new H1("Oto dane Twojego konta");
-        h2.getStyle()
-                .set("text-align", "center")
-                .set("margin-bottom", "var(--lumo-space-l)");
 
+        horizontalLayout.add(userContent,changePassword);
 
-        createActionButtons(layout);
-        add(h1,h2,userContent,layout);
+        add(h1,horizontalLayout);
     }
 
-    private void createActionButtons(VerticalLayout layout){
+    private void createActionButtons(VerticalLayout layout,Dialog dialog){
         Button save = new Button("Zapisz");
         save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
@@ -83,6 +85,7 @@ public class UserAccount extends Div implements BeforeEnterObserver {
                            .show("Dane zaktualizowane pomyślnie", 3000, Notification.Position.MIDDLE);
                    notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
+                   dialog.close();
                    UI.getCurrent().navigate("/account");
                }
            } catch (DataIntegrityViolationException validationException){
@@ -96,40 +99,96 @@ public class UserAccount extends Div implements BeforeEnterObserver {
 
         cancel.addClickListener(event -> {
             binder.readBean(loggedUser);
+            dialog.close();
         });
 
         layout.add(save,cancel);
     }
 
     private VerticalLayout createUserInformations(User loggedUser){
-
         VerticalLayout userInfo = new VerticalLayout();
 
-        userInfo.setPadding(true);
-        userInfo.setWidth("450px");
-        userInfo.setHeight("100%");
-        userInfo.getStyle().set("align-self", "flex-start");
-        userInfo.getStyle().set("padding", "2rem");
+        Button button = new Button("Chcę zmienić swoje dane");
+        button.setSizeFull();
+        button.setWidthFull();
+        button.getStyle().set("font-size","30px");
+        button.addThemeVariants(ButtonVariant.LUMO_LARGE);
+        button.addClickListener(event ->{
 
-        TextField firstNameField = new TextField("Imię");
-        firstNameField.setValue(loggedUser.getFirstName());
+            VerticalLayout insideLayout = new VerticalLayout();
+            Dialog dialog = new Dialog();
 
-        TextField lastNameField = new TextField("Nazwisko");
-        lastNameField.setValue(loggedUser.getLastName());
+            TextField firstNameField = new TextField("Imię");
+            firstNameField.setValue(loggedUser.getFirstName());
 
-        TextField emailField = new TextField("Email");
-        emailField.setValue(loggedUser.getEmail());
-        emailField.setReadOnly(true);
+            TextField lastNameField = new TextField("Nazwisko");
+            lastNameField.setValue(loggedUser.getLastName());
 
-        userInfo.add(firstNameField,lastNameField,emailField);
-        binder.bind(firstNameField,User::getFirstName,User::setFirstName);
-        binder.bind(lastNameField,User::getLastName,User::setLastName);
-        binder.bind(emailField,User::getEmail,User::setEmail);
+            TextField emailField = new TextField("Email");
+            emailField.setValue(loggedUser.getEmail());
+            emailField.setReadOnly(true);
 
+            insideLayout.add(firstNameField,lastNameField,emailField);
+            binder.bind(firstNameField,User::getFirstName,User::setFirstName);
+            binder.bind(lastNameField,User::getLastName,User::setLastName);
+            binder.bind(emailField,User::getEmail,User::setEmail);
+
+            createActionButtons(insideLayout,dialog);
+
+            dialog.add(insideLayout);
+            dialog.open();
+        });
+
+        userInfo.add(button);
         return userInfo;
     }
 
+    private VerticalLayout changeUserPassword(User user){
+        VerticalLayout layout = new VerticalLayout();
 
+        Button changePasswordButton = new Button("Chcę zmienić swoje hasło");
+        changePasswordButton.setSizeFull();
+        changePasswordButton.setWidthFull();
+        changePasswordButton.getStyle().set("font-size","30px");
+        changePasswordButton.addThemeVariants(ButtonVariant.LUMO_LARGE);
+        changePasswordButton.addClickListener(event ->{
+            Dialog dialog = new Dialog();
+            VerticalLayout insideDialogLayout = new VerticalLayout();
+
+            PasswordField passwordField = new PasswordField("Wpisz nowe hasło");
+            PasswordField passwordFieldRepeated = new PasswordField("Powtórz nowe hasło");
+
+            Button confirmButton = new Button("Zapisz nowe hasło",click ->{
+                String password = passwordField.getValue();
+                String repeatedPassword = passwordFieldRepeated.getValue();
+
+                if (password.equals(repeatedPassword)){
+                    userService.setUserNewPassword(user.getEmail(),password);
+
+                    dialog.close();
+                }
+                else {
+                    Notification notification = Notification.show("Hasła do siebie nie pasują",3000, Notification.Position.BOTTOM_CENTER);
+                    notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+                }
+            });
+            confirmButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
+
+            Button cancelButton = new Button("Anuluj", click ->{
+                dialog.close();
+            });
+            cancelButton.addThemeVariants(ButtonVariant.LUMO_WARNING);
+
+            insideDialogLayout.add(passwordField,passwordFieldRepeated,confirmButton,cancelButton);
+
+            dialog.add(insideDialogLayout);
+            dialog.open();
+        });
+
+        layout.add(changePasswordButton);
+
+        return layout;
+    }
 
 
     @Override

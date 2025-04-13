@@ -69,7 +69,7 @@ public class ShoppingHistoryView extends Div implements BeforeEnterObserver {
             String createdAt = String.valueOf(purchase.getCreatedAt());
             LocalDateTime date = LocalDateTime.parse(createdAt);
 
-            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy, HH:mm:ss", Locale.of("pl", "PL"));
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy, HH:mm", Locale.of("pl", "PL"));
 
             String finalDate = date.format(dateTimeFormatter);
 

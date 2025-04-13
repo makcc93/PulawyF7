@@ -3,6 +3,8 @@ package pl.eurokawa.services;
 import java.util.List;
 import java.util.Optional;
 
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.server.VaadinSession;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +32,24 @@ public class UserService {
         User user = new User(firstName,lastName,email,securedPassword);
         userRepository.save(user);
 
+    }
+
+    public void setUserNewPassword (String email, String password){
+        Optional<User> userByEmail = getUserByEmail(email);
+
+        if (userByEmail.isPresent()){
+            User user = userByEmail.orElseThrow();
+
+            user.setPassword(passwordEncoder.encode(password));
+            save(user);
+
+            Notification notification = Notification.show("Poprawnie zmieniono hasło",3000, Notification.Position.BOTTOM_CENTER);
+            notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+        }
+        else {
+            Notification notification = Notification.show("Taki użytkownik nie jest zarejestrowany!",3000, Notification.Position.BOTTOM_CENTER);
+            notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+        }
     }
 
     public Optional<User> getUserByEmail(String email){
