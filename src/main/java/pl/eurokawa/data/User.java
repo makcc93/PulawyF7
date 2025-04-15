@@ -25,15 +25,18 @@ public class User extends AbstractEntity implements UserDetails {
     @Column(name = "role")
     private String role;
 
+    @Column(name = "is_coffee_member")
+    private Boolean isCoffeeMember;
+
     public User (){}
 
-    public User(String firstName,String lastName,String email,String password){ //String role
-
+    public User(String firstName, String lastName, String email, String password){
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.password = password;
         this.role = "NOTCONFIRMED";
+        this.isCoffeeMember = false;
     }
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,orphanRemoval = true)
@@ -118,6 +121,14 @@ public class User extends AbstractEntity implements UserDetails {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public boolean isCoffeeMember() {
+        return isCoffeeMember;
+    }
+
+    public void setCoffeeMember(boolean coffeeMember) {
+        isCoffeeMember = coffeeMember;
     }
 
     @Override

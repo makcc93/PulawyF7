@@ -49,6 +49,7 @@ public class UserView extends Div implements BeforeEnterObserver {
     private TextField lastName;
     private TextField email;
     private ComboBox<String> role;
+    private ComboBox<Boolean> isCoffeeMember;
     private final Button cancel = new Button("Anuluj");
     private final Button save = new Button("Zapisz");
     private final Button delete = new Button("Usuń");
@@ -79,7 +80,7 @@ public class UserView extends Div implements BeforeEnterObserver {
 
         grid.addColumn("firstName").setAutoWidth(true).setHeader("IMIĘ");
         grid.addColumn("lastName").setAutoWidth(true).setHeader("NAZWISKO");
-        grid.addColumn("email").setAutoWidth(true).setHeader("EMAIL");
+//        grid.addColumn("email").setAutoWidth(true).setHeader("EMAIL");
         grid.addColumn(user -> {
             Double sum = moneyRepository.getSumOfUserDeposit(user.getId());
 
@@ -160,16 +161,6 @@ public class UserView extends Div implements BeforeEnterObserver {
         delete.setVisible(securityService.hasRole("ADMIN"));
     }
 
-
-
-    private void getSumOfUserDeposit(){
-
-        grid.addColumn("deposit").setAutoWidth(true).setHeader("SUMA WPŁAT");
-    }
-
-
-
-
     private void createEditorLayout(SplitLayout splitLayout) {
         Div editorLayoutDiv = new Div();
         editorLayoutDiv.setClassName("editor-layout");
@@ -179,6 +170,7 @@ public class UserView extends Div implements BeforeEnterObserver {
         editorLayoutDiv.add(editorDiv);
 
         FormLayout formLayout = new FormLayout();
+
         firstName = new TextField("Imię");
         firstName.setPlaceholder("Wprowadź imię..");
         firstName.setReadOnly(!securityService.hasRole("ADMIN"));
@@ -193,13 +185,17 @@ public class UserView extends Div implements BeforeEnterObserver {
 
         role = new ComboBox<>("Rodzaj użytkownika");
         role.setVisible(securityService.hasRole("ADMIN"));
-        role.setAllowCustomValue(true);
+        role.setAllowCustomValue(false);
         role.setItems("NOTCONFIRMED","USER","ADMIN");
         role.setHelperText("Rozwiń listę, aby nadać uprawnienia");
 
+        isCoffeeMember = new ComboBox<>("Należy do grupy kawoszy");
+        isCoffeeMember.setHelperText("Rozwiń listę, aby nadać uprawnienia");
+        isCoffeeMember.setItems(true,false);
+        isCoffeeMember.setItemLabelGenerator(value -> value ? "Tak" : "Nie");
+        isCoffeeMember.setVisible(securityService.hasRole("ADMIN"));
 
-
-        formLayout.add(firstName, lastName, email,role);
+        formLayout.add(firstName, lastName, email,role,isCoffeeMember);
 
         editorDiv.add(formLayout);
         createButtonLayout(editorLayoutDiv);
@@ -245,6 +241,7 @@ public class UserView extends Div implements BeforeEnterObserver {
             firstName.clear();
             lastName.clear();
             email.clear();
+            isCoffeeMember.clear();
         }
     }
 

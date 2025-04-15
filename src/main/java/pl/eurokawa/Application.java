@@ -26,9 +26,9 @@ import pl.eurokawa.data.UserRepository;
 @SpringBootApplication
 @Theme(value = "eurokawa", variant = Lumo.DARK)
 public class Application implements AppShellConfigurator {
-//koncze na tym ze mozna dodawac foto ale nie wyswietla sie miniaturka w historii zakupow, trzeba poprawic
-    //potem chyba czas rozszerzyc account view o avatar lub cos innego
-    //powodzenia!
+    //koncze na tym ze UserView wybierajac z listy czy jesst kawosz nie zmienia sie w sql
+    //potem warto dodac dostep do wplat i rzeczy zwiazanych z kawa tylko dla osob isCoffeeMember = true;
+    //powodzenia!!
     
     public static void main(String[] args) {
         SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
